@@ -67,15 +67,26 @@ app.post("/api/persons", (req, res) => {
   const contact = req.body
   const content = { ...contact, id: rngId() }
 
-  if(persons.findIndex((person) => (
+  if(
+      !req.body.hasOwnProperty("name") ||
+      !req.body.hasOwnProperty("number") ||
+      !Boolean(req.body.name.trim()) ||
+      req.body.number.replace(/\s/g, "").length > 13 ||
+      req.body.number.replace(/\s/g, "").length < 6
+    ) {
+    console.log(`invalid name or number`)
+    res.status(400).end()
+  } else if(
+    persons.findIndex(person => (
       person.name.toLowerCase() === content.name.toLowerCase()
-    )) === -1) {
+    )) !== -1
+    ) {
+    console.log(`${req.body.name} already exists`)
+    res.status(400).end()
+  } else {
     persons.concat(content)
     console.log(content)
     res.json(content)
-  } else {
-    console.log(`${req.body.name} already exists`)
-    res.status(400).end()
   }
   
 })
